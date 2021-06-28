@@ -89,6 +89,14 @@ try:
         right_col.header('Cases/Month/Owner')
         right_col.write(cases_pivot2)
 
+        left_col.header('Total Cases/Owner')
+        plot1 = px.bar(data_frame=cases_pivot1)
+        left_col.plotly_chart(plot1)
+
+        right_col.header('Total Cases/Month')
+        plot2 = px.bar(data_frame=cases_pivot2)
+        right_col.plotly_chart(plot2)
+
         left_col.header('Avg Cases/Month/Owner')
         avg_cases1 = cases_pivot1.reset_index().mean().round(0).to_frame('avg')
         left_col.bar_chart(avg_cases1)
@@ -103,17 +111,11 @@ try:
         plot2 = px.pie(avg_cases2, values='avg', names='CaseOwner')
         right_col.plotly_chart(plot2)
 
-        # table = go.Figure(data=cases_pivot1)
-        # table.update_layout(width=900, height=300)
-        # table.show()
-        # st.write(table)
-
-        plot1 = px.bar(data_frame=cases_pivot1)
-        plot2 = px.bar(data_frame=cases_pivot2)
-        left_col.plotly_chart(plot1)
-        right_col.plotly_chart(plot2)
-
-        selectbox01 = st.sidebar.selectbox("Select Search Field: ", options=['CaseNumber', 'CaseOwner', 'SIS', 'AccountName'])
+        st.header('Search Analysis')
+        selectbox01 = st.sidebar.selectbox("Select Search Field: ", options=['CaseNumber',
+                                                                             'CaseOwner',
+                                                                             'SIS',
+                                                                             'AccountName'])
 
         options = df[selectbox01].drop_duplicates().tolist()
         selectbox02 = st.sidebar.selectbox("Select an Option: ", options=options)
@@ -122,28 +124,6 @@ try:
                                      'SIS', 'Subject']].drop(selectbox01, axis='columns')
         st.write(df_owner2)
 
-        # st.header('Select a Case Owner')
-        # selectbox01 = st.sidebar.selectbox("Select CaseOwner: ", options=owners.tolist())
-        # df_owner = df[df['CaseOwner'] == selectbox01]
-        # df_owner2 = df_owner.loc[:,['DateGrabbed', 'DateClosed', 'CaseNumber', 'AccountName',
-        #                               'SIS', 'Subject']]
-        # st.write(df_owner2)
-        #
-        # st.header('Select a SIS')
-        # sis = df['SIS'].drop_duplicates().tolist()
-        # selectbox01 = st.sidebar.selectbox("Select SIS: ", options=sis)
-        # df_owner = df[df['SIS'] == selectbox01]
-        # df_owner2 = df_owner.loc[:, ['DateGrabbed', 'DateClosed', 'CaseNumber', 'AccountName',
-        #                              'CaseOwner', 'Subject']]
-        # st.write(df_owner2)
-        #
-        # st.header('Select Account Name:')
-        # account = df['AccountName'].drop_duplicates().tolist()
-        # selectbox01 = st.sidebar.selectbox("Select Account Name: ", options=account)
-        # df_owner = df[df['AccountName'] == selectbox01]
-        # df_owner2 = df_owner.loc[:, ['DateGrabbed', 'DateClosed', 'CaseNumber', 'SIS',
-        #                              'CaseOwner', 'Subject']]
-        # st.write(df_owner2)
 
 except Exception as e:
     print("Error de la aplicacion: ", e)
