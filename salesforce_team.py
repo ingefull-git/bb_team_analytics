@@ -3,7 +3,6 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 import matplotlib.pyplot as plt
-import seaborn as sns
 
 st.set_page_config(layout="wide")
 team_analytics_01 = st.beta_container()
