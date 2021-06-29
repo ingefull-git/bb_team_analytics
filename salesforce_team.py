@@ -1,8 +1,11 @@
+from itertools import groupby
+
+import matplotlib.pyplot as plt
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
-import matplotlib.pyplot as plt
+from numpy.core.defchararray import count
 
 st.set_page_config(layout="wide")
 team_analytics_01 = st.beta_container()
@@ -43,27 +46,20 @@ uploaded_file = st.sidebar.file_uploader(
     type=['csv']
     )
 print(uploaded_file)
+
 if uploaded_file is not None and "bb_team" in uploaded_file.name:
     print(uploaded_file)
     print("Ready to start..!")
     try:
-
         df, owners, year_month = load_data(uploaded_file)
     except Exception as e:
         print(e)
-
-
 
 try:
     with team_analytics_01:
         st.title('Team Cases Analytics')
         st.header('Dataframe')
-        try:
-            table = go.Table(df)
-            table.update_layout()
-            st.write(table)
-        except Exception as e:
-            st.write(df)
+        st.write(df)
 
         st.header('Total Cases/Month')
         cases_month = df['year_month'].value_counts()
@@ -71,9 +67,14 @@ try:
 
         st.header('Total Cases/Owner')
         cant_cases = df['CaseOwner'].value_counts()
-        # st.write(cant_cases)
         st.bar_chart(cant_cases)
 
+        st.header('Total Cases/Owner')
+        cases_by_owner = df.groupby('CaseOwner')['Subject'].count().reset_index()
+        plot1 = px.pie(cases_by_owner, values='Subject', names='CaseOwner')
+        st.plotly_chart(plot1)
+
+    with team_analytics_02:
         left_col, right_col = st.beta_columns(2)
 
         cases_pivot1 = df.pivot_table(index='CaseOwner', columns='year_month', values='Status', aggfunc='count')
@@ -96,21 +97,13 @@ try:
         plot2 = px.bar(data_frame=cases_pivot2)
         right_col.plotly_chart(plot2)
 
-        left_col.header('Avg Cases/Month/Owner')
+        st.header('Avg Cases/Month/Owner')
         avg_cases1 = cases_pivot1.reset_index().mean().round(0).to_frame('avg')
-        left_col.bar_chart(avg_cases1)
+        st.bar_chart(avg_cases1)
         avg_cases1 = avg_cases1.reset_index()
-        plot1 = px.pie(avg_cases1, values='avg', names='year_month')
-        left_col.plotly_chart(plot1)
-
-        right_col.header('Avg Cases/Owner/Month')
-        avg_cases2 = cases_pivot2.reset_index().mean().round(0).to_frame('avg')
-        right_col.bar_chart(avg_cases2)
-        avg_cases2 = avg_cases2.reset_index()
-        plot2 = px.pie(avg_cases2, values='avg', names='CaseOwner')
-        right_col.plotly_chart(plot2)
-
-        st.header('Search Analysis')
+    
+    with team_analytics_03:
+       
         selectbox01 = st.sidebar.selectbox("Select Search Field: ", options=['CaseNumber',
                                                                              'CaseOwner',
                                                                              'SIS',
@@ -118,9 +111,11 @@ try:
 
         options = df[selectbox01].drop_duplicates().tolist()
         selectbox02 = st.sidebar.selectbox("Select an Option: ", options=options)
+        header = "Search Analysis Criteria: " + str(selectbox01) + " - " + str(selectbox02)
+        st.header(header)
         df_owner = df[df[selectbox01] == selectbox02]
         df_owner2 = df_owner.loc[:, ['DateGrabbed', 'DateClosed', 'CaseOwner', 'CaseNumber', 'AccountName',
-                                     'SIS', 'Subject']].drop(selectbox01, axis='columns')
+                                     'SIS', 'Subject']].drop(selectbox01, axis='columns').sort_values('DateGrabbed')
         st.write(df_owner2)
 
 
